@@ -8,15 +8,14 @@ export class AuthController {
 
   @Post('signin')
   signin(@Body() dto: SigninDTO) {
-    return this.authService.signin(dto)
+    return this.authService.signin(dto);
   }
 
   @Post('signup')
   signup(@Body() dto: SignupDTO) {
-    return this.authService.signup(dto)
+    return this.authService.signup(dto);
   }
 }
-
 
 // we don't use
 // signup(@Req() req: Request, @Res() res: Response)

@@ -32,6 +32,6 @@ export class SignupDTO {
   @IsString()
   @IsNotEmpty()
   @MinLength(5)
-  @IsEqualTo("password")
+  @IsEqualTo('password')
   confirmPassword: string;
 }

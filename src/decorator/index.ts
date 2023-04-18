@@ -1,1 +1,1 @@
-export * from "./IsEqualTo.decorator"
+export * from './IsEqualTo.decorator';

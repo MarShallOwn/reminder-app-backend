@@ -7,7 +7,12 @@ import { PrismaModule } from './prisma/prisma.module';
 import { MongooseModule } from '@nestjs/mongoose';
 
 @Module({
-  imports: [AuthModule, UserModule, PrismaModule, MongooseModule.forRoot("mongodb://127.0.0.1:27017/reminder-app-db")],
+  imports: [
+    AuthModule,
+    UserModule,
+    PrismaModule,
+    MongooseModule.forRoot('mongodb://127.0.0.1:27017/reminder-app-db'),
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
