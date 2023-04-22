@@ -4,6 +4,7 @@ import { SigninDTO, SignupDTO } from './dto';
 import * as bcrypt from 'bcrypt';
 import { UserService } from 'src/user/user.service';
 import jsonResponse from 'src/utils/jsonResponse';
+import { catchError } from 'src/utils/catchError';
 
 @Injectable({})
 export class AuthService {
@@ -28,12 +29,7 @@ export class AuthService {
 
       return jsonResponse(201, 'User Added Successfully', { data: { userId } });
     } catch (err) {
-      console.log(err);
-      if (err instanceof Error) {
-        return jsonResponse(400, err.message, { error: err });
-      } else {
-        return jsonResponse(400, "Something went wrong", { error: err });
-      }
+      return catchError(err);
     }
   }
 }
