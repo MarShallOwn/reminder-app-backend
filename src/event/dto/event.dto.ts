@@ -25,5 +25,5 @@ export class NewEventDTO {
 export class EventDTO extends NewEventDTO {
     @IsString()
     @IsNotEmpty()
-    id: string;
+    _id: string;
 }
