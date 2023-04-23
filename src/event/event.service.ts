@@ -6,7 +6,7 @@ import jsonResponse from 'src/utils/jsonResponse';
 import { catchError } from 'src/utils/catchError';
 
 type EventType = {
-  id?: string;
+  _id?: string;
   title: string;
   start: Date;
   end: Date;
@@ -48,7 +48,7 @@ export default class EventService {
 
   async updateEvent(reqEvent: EventType) {
     try {
-      await this.eventModel.findByIdAndUpdate(reqEvent.id, { ...reqEvent });
+      await this.eventModel.findByIdAndUpdate(reqEvent._id, { ...reqEvent });
 
       return jsonResponse(204, 'Events Successfully Updated', { data: null });
     } catch (err) {
