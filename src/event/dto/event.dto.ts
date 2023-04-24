@@ -1,4 +1,4 @@
-import { IsDateString, IsNotEmpty, IsString } from "class-validator";
+import { IsDateString, IsNotEmpty, IsOptional, IsString } from "class-validator";
 import { IsBeforeDate } from "src/decorator/IsBeforeDate.decorator";
 
 export class NewEventDTO {
@@ -6,6 +6,8 @@ export class NewEventDTO {
     @IsNotEmpty()
     title: string;
     
+    @IsString()
+    @IsOptional()
     description: string;
 
     @IsDateString()

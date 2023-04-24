@@ -8,6 +8,7 @@ export class Event {
   @Prop({ required: true })
   title: string;
 
+  @Prop()
   description: string;
 
   @Prop({ required: true })
