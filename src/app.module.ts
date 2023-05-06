@@ -9,6 +9,7 @@ import { EventModule } from './event/event.module';
 import { ConfigModule } from '@nestjs/config';
 import { DATABASE_URI } from "./const/databaseURI"
 
+console.log(DATABASE_URI)
 
 
 @Module({
