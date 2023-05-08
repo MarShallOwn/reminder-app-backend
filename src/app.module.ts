@@ -8,6 +8,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { EventModule } from './event/event.module';
 import { ConfigModule } from '@nestjs/config';
 import { DATABASE_URI } from "./const/databaseURI"
+import { RefreshTokenModule } from './refreshToken/refreshToken.module';
 
 console.log(DATABASE_URI)
 
@@ -18,6 +19,7 @@ console.log(DATABASE_URI)
     UserModule,
     PrismaModule,
     EventModule,
+    RefreshTokenModule,
     ConfigModule.forRoot(),
     MongooseModule.forRoot(DATABASE_URI, {
       dbName: process.env.DATABASE_NAME,

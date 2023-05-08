@@ -1,10 +1,9 @@
 import jsonResponse from "./jsonResponse";
 
-export const catchError = (err) => {
-    console.log(err);
+export const catchError = (err, statusCode = 400) => {
     if (err instanceof Error) {
-      return jsonResponse(400, err.message, { error: err });
+      return jsonResponse(statusCode, err.message, { error: err });
     } else {
-      return jsonResponse(400, "Something went wrong", { error: err });
+      return jsonResponse(statusCode, "Something went wrong", { error: err });
     }
 }
