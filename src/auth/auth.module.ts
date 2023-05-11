@@ -6,11 +6,14 @@ import { RefreshTokenModule } from 'src/refreshToken/refreshToken.module';
 import { JwtModule } from '@nestjs/jwt';
 
 @Module({
-  imports: [UserModule, RefreshTokenModule,     JwtModule.register({
-    global: true,
-    secret: process.env.ACCESS_TOKEN_SECRET,
-    signOptions: { expiresIn: '43200s' },
-  }),],
+  imports: [
+    UserModule,
+    RefreshTokenModule,
+    JwtModule.register({
+      secret: process.env.ACCESS_TOKEN_SECRET,
+      signOptions: { expiresIn: '900s' },
+    }),
+  ],
   controllers: [AuthController],
   providers: [AuthService],
 })

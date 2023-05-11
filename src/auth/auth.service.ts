@@ -1,20 +1,62 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { SigninDTO, SignupDTO, TokenDTO } from './dto';
 import * as bcrypt from 'bcrypt';
 import { UserService } from 'src/user/user.service';
 import jsonResponse from 'src/utils/jsonResponse';
 import { catchError } from 'src/utils/catchError';
-import { generateAccessToken, generateRefreshToken } from 'src/utils/auth';
 import { RefreshTokenService } from 'src/refreshToken/refreshToken.service';
 import { RefreshTokenType } from 'types';
 import { Schema } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
 
-
 @Injectable({})
 export class AuthService {
-  //constructor(private prisma: PrismaService) {}
-  constructor(private userService: UserService, private refreshTokenService: RefreshTokenService, private jwtService: JwtService) {}
+  constructor(
+    private userService: UserService,
+    private refreshTokenService: RefreshTokenService,
+    private jwtService: JwtService,
+  ) {}
+
+  /**
+   *
+   * @param {String} firstname
+   * @param {String} lastname
+   * @description generate access token that stores user data and returns it
+   * @returns {String} Access token
+   */
+  private async generateAccessToken(
+    _id: Schema.Types.ObjectId,
+    firstname: string,
+    lastname: string,
+  ) {
+    return await this.jwtService.signAsync(
+      { _id, firstname, lastname },
+      {
+        secret: process.env.ACCESS_TOKEN_SECRET,
+      },
+    );
+  } // normally it should be 15 mins === 900s
+
+  /**
+   *
+   * @param {String} firstname
+   * @param {String} lastname
+   * @description generate refresh token that stores user data and returns it
+   * @returns {String} Refresh token
+   */
+  private async generateRefreshToken(
+    _id: Schema.Types.ObjectId,
+    firstname: string,
+    lastname: string,
+  ) {
+    return await this.jwtService.signAsync(
+      { _id, firstname, lastname },
+      {
+        secret: process.env.REFRESH_TOKEN_SECRET,
+        expiresIn: '43200s',
+      },
+    );
+  }
 
   async signin(dto: SigninDTO) {
     try {
@@ -24,14 +66,14 @@ export class AuthService {
           error: 'Incorrect Email or Password!',
         });
 
-      const userId = (user._id as unknown) as Schema.Types.ObjectId
+      const userId = user._id as unknown as Schema.Types.ObjectId;
 
-      const accessToken = generateAccessToken(
+      const accessToken = await this.generateAccessToken(
         userId,
         user.firstname,
         user.lastname,
       );
-      const refreshToken = generateRefreshToken(
+      const refreshToken = await this.generateRefreshToken(
         userId,
         user.firstname,
         user.lastname,
@@ -39,28 +81,29 @@ export class AuthService {
 
       const expiresAtDate: Date = new Date();
       expiresAtDate.setTime(expiresAtDate.getTime() + 24 * 60 * 60 * 1000); // 6 minutes expiary date === 0.1 || 1.2 minutes === 0.02
-      const refreshTokenDB : RefreshTokenType = {
+      const refreshTokenDB: RefreshTokenType = {
         token: refreshToken,
         expiresAt: expiresAtDate,
         user: userId,
-      };
+      }; //24 * 60 * 60 * 1000
 
       // add the refresh token to the database
       await this.refreshTokenService.insertRefreshToken(refreshTokenDB);
 
-      // return statu 200 with access token and refresh token
-      return jsonResponse(200, "User Logged In Successfully!", {data: {
-        id: user._id,
-        firstname: user.firstname,
-        lastname: user.lastname,
-        email: user.email,
-        tokens: {
-          accessToken,
-          refreshToken,
+      // return status 200 with access token and refresh token
+      return jsonResponse(200, 'User Logged In Successfully!', {
+        data: {
+          id: user._id,
+          firstname: user.firstname,
+          lastname: user.lastname,
+          email: user.email,
+          tokens: {
+            accessToken,
+            refreshToken,
+          },
         },
-      } });
+      });
     } catch (err) {
-      console.log(err)
       return catchError(err);
     }
   }
@@ -71,15 +114,22 @@ export class AuthService {
 
     // if refresh token is null then return status 401
     if (refreshToken === null)
-    return jsonResponse(401, "No refresh token provided!", {error: 'No refresh token provided!', data: null });
+      return jsonResponse(401, 'No refresh token provided!', {
+        error: 'No refresh token provided!',
+        data: null,
+      });
 
     // if refresh token exists then fetch it from DB
-    const refreshTokenObj = await this.refreshTokenService.findRefreshToken(refreshToken);
-    
+    const refreshTokenObj = await this.refreshTokenService.findRefreshToken(
+      refreshToken,
+    );
 
     // if refresh token wasn't found then return status of 401
     if (refreshTokenObj === null)
-    return jsonResponse(401, "unauthorized", {error: 'unauthorized', data: null });
+      return jsonResponse(401, 'unauthorized', {
+        error: 'unauthorized',
+        data: null,
+      });
 
     // check if the expiary date of the refresh token ended or not
     // if expiary date ended then delete the refresh token and return status 403
@@ -89,22 +139,32 @@ export class AuthService {
     const expiresAtDate = new Date(refreshTokenObj.expiresAt);
     if (expiresAtDate <= currentDate) {
       //await refreshTokenObj.deleteOne();
-      return jsonResponse(403, 'access is forbidden, login Again', {error: 'access is forbidden, login Again', data: null });
+      return jsonResponse(403, 'access is forbidden, login Again', {
+        error: 'access is forbidden, login Again',
+        data: null,
+      });
     }
 
-    // check if refreshToken is valid if not return status 403
-    // if it is valid then generate access token and return status 200 with the generated access token
-    jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
-      if (err)
-      return jsonResponse(403, 'Something Wrong Happened', {error: 'Something Wrong Happened', data: null });
+    try {
+      // check if refreshToken is valid if not return status 403
+      // if it is valid then generate access token and return status 200 with the generated access token
+      const payload = await this.jwtService.verifyAsync(refreshToken, {
+        secret: process.env.REFRESH_TOKEN_SECRET,
+      });
+      const user = payload;
 
-      const accessToken = generateAccessToken(
+      const accessToken = await this.generateAccessToken(
         user._id,
         user.firstname,
         user.lastname,
       );
-      return jsonResponse(200, "Access Token Generated Successfully!", {error: 'Something Wrong Happened', data: {accessToken} });
-    });
+
+      return jsonResponse(200, 'Access Token Generated Successfully!', {
+        data: { accessToken },
+      });
+    } catch {
+      throw new UnauthorizedException();
+    }
   }
 
   async signup(dto: SignupDTO) {
@@ -123,5 +183,9 @@ export class AuthService {
     } catch (err) {
       return catchError(err);
     }
+  }
+
+  async profile() {
+    return jsonResponse(200, 'Profile being accessed', { data: null });
   }
 }
