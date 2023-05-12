@@ -5,7 +5,7 @@ import { UserService } from 'src/user/user.service';
 import jsonResponse from 'src/utils/jsonResponse';
 import { catchError } from 'src/utils/catchError';
 import { RefreshTokenService } from 'src/refreshToken/refreshToken.service';
-import { RefreshTokenType } from 'types';
+import { JWTPayload, RefreshTokenType } from 'types';
 import { Schema } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
 
@@ -100,6 +100,9 @@ export class AuthService {
           tokens: {
             accessToken,
             refreshToken,
+            accessTokenExpiry: (
+              this.jwtService.decode(accessToken) as JWTPayload
+            ).exp,
           },
         },
       });
@@ -160,7 +163,10 @@ export class AuthService {
       );
 
       return jsonResponse(200, 'Access Token Generated Successfully!', {
-        data: { accessToken },
+        data: {
+          accessToken,
+          accessTokenExpiry: (this.jwtService.decode(accessToken) as JWTPayload).exp,
+        },
       });
     } catch {
       throw new UnauthorizedException();
