@@ -80,7 +80,7 @@ export class AuthService {
       );
 
       const expiresAtDate: Date = new Date();
-      expiresAtDate.setTime(expiresAtDate.getTime() + 0.03 * 60 * 60 * 1000); // 6 minutes expiary date === 0.1 || 1.2 minutes === 0.02
+      expiresAtDate.setTime(expiresAtDate.getTime() + 0.05 * 60 * 60 * 1000); // 6 minutes expiary date === 0.1 || 1.2 minutes === 0.02
       const refreshTokenDB: RefreshTokenType = {
         token: refreshToken,
         expiresAt: expiresAtDate,
