@@ -7,18 +7,17 @@ import { PrismaModule } from './prisma/prisma.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { EventModule } from './event/event.module';
 import { ConfigModule } from '@nestjs/config';
-import { DATABASE_URI } from "./const/databaseURI"
 
 
 
 @Module({
   imports: [
+    ConfigModule.forRoot(),
     AuthModule,
     UserModule,
     PrismaModule,
     EventModule,
-    ConfigModule.forRoot(),
-    MongooseModule.forRoot(DATABASE_URI, {
+    MongooseModule.forRoot(`mongodb://${process.env.DATABASE_USERNAME}:${process.env.DATABASE_PASSWORD}@${process.env.DATABASE_HOSTNAME}:${process.env.DATABASE_PORT}`, {
       dbName: process.env.DATABASE_NAME,
       authSource: process.env.DATABASE_AUTH_SOURCE
     }),
