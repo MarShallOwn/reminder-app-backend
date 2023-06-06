@@ -4,13 +4,13 @@ import {
     ValidationOptions,
   } from 'class-validator';
   
-  export function IsBeforeDate(
+  export function IsAfterDate(
     property: string,
     validationOptions?: ValidationOptions,
   ) {
     return (object: any, propertyName: string) => {
       registerDecorator({
-        name: 'isBeforeDate',
+        name: 'isAfterDate',
         target: object.constructor,
         propertyName,
         constraints: [property],
@@ -19,12 +19,12 @@ import {
           validate(value: any, args: ValidationArguments) {
             const [relatedPropertyName] = args.constraints;
             const relatedValue = (args.object as any)[relatedPropertyName];
-            return  value <= relatedValue;
+            return value >= relatedValue;
           },
   
           defaultMessage(args: ValidationArguments) {
             const [relatedPropertyName] = args.constraints;
-            return `${propertyName} should be before ${relatedPropertyName}!`;
+            return `${propertyName} shouldn't be before ${relatedPropertyName}!`;
           },
         },
       });

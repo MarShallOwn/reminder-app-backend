@@ -1,4 +1,5 @@
-import { IsDateString, IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { IsBoolean, IsDateString, IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { IsAfterDate } from "src/decorator/IsAfterDate.decorator";
 import { IsBeforeDate } from "src/decorator/IsBeforeDate.decorator";
 
 export class NewEventDTO {
@@ -16,12 +17,21 @@ export class NewEventDTO {
 
     @IsDateString()
     @IsNotEmpty()
-    @IsBeforeDate("start")
+    @IsAfterDate("start")
     end: Date;
 
     @IsString()
     @IsNotEmpty()
     priority: string;
+
+    @IsDateString()
+    @IsOptional()
+    @IsBeforeDate("start")
+    notificationDate?: Date;
+
+    @IsBoolean()
+    @IsOptional()
+    silentNotification?: boolean = false;
 }
 
 export class EventDTO extends NewEventDTO {

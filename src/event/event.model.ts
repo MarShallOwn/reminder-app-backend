@@ -20,6 +20,9 @@ export class Event {
   @Prop({ required: true })
   end: Date;
 
+  @Prop({ required: true })
+  notificationDate: Date;
+
   @Prop({ required: true, default: Date.now })
   createdAt: Date;
 }

@@ -12,6 +12,7 @@ type EventType = {
   end: Date;
   priority: string;
   description?: string;
+  notificationDate?: Date;
 };
 
 @Injectable({})
@@ -22,7 +23,14 @@ export default class EventService {
 
   async insertEvent(reqEvent: EventType) {
     try {
-      const event = new this.eventModel(reqEvent);
+      let savedEvent = reqEvent;
+      if(!reqEvent.hasOwnProperty("notificationDate")) {
+        const oneDayBeforeStartDate = new Date(reqEvent.start);
+        oneDayBeforeStartDate.setDate(oneDayBeforeStartDate.getDate() - 1);
+        savedEvent.notificationDate = oneDayBeforeStartDate;
+      }
+
+      const event = new this.eventModel(savedEvent);
 
       const result = await event.save();
 
