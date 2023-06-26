@@ -4,6 +4,7 @@ import { Model } from 'mongoose';
 import { EventDocument } from './event.model';
 import jsonResponse from 'src/utils/jsonResponse';
 import { catchError } from 'src/utils/catchError';
+import moment from "moment";
 
 type EventType = {
   _id?: string;
@@ -45,6 +46,22 @@ export default class EventService {
   async getAllEvents() {
     try {
       const events = await this.eventModel.find();
+
+      return jsonResponse(200, 'Events Successfully Retrieved', {
+        data: { events },
+      });
+    } catch (err) {
+      return catchError(err);
+    }
+  }
+
+  async getNotifyEvents() {
+    try {
+      const today = moment().startOf('day');
+      const endOfDay = moment(today).endOf('day').toDate();
+      console.log(today)
+      console.log(endOfDay)
+      const events = await this.eventModel.find({ notificationDate: { $lte: endOfDay  }, })
 
       return jsonResponse(200, 'Events Successfully Retrieved', {
         data: { events },

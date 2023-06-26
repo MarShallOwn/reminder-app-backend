@@ -12,10 +12,16 @@ export class EventController {
         type: "string",
         isArray: true
     })
-    @Get()
+    @Get("/notifications")
     getAllEvents() {
+        return this.eventService.getNotifyEvents()
+    }
+
+    @Get()
+    getNotifyEvents() {
         return this.eventService.getAllEvents()
     }
+
 
     @Post()
     insertEvent(@Body() dto : NewEventDTO){
